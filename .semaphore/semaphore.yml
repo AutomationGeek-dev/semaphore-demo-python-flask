@@ -5,9 +5,18 @@ agent:
     type: e1-standard-2
     os_image: ubuntu1804
 blocks:
-  - name: 'Block #1'
+  - name: Build and tag docker files
     task:
       jobs:
-        - name: 'Job #1'
+        - name: Build
           commands:
+            - 'echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin'
             - checkout
+            - docker-compose build
+            - 'docker tag pyflasksemaphore:latest "$DOCKER_USERNAME"/pyflasksemaphore:latest'
+            - 'docker tag pyflasksemaphore:latest "$DOCKER_USERNAME"/pyflasksemaphore:$SEMAPHORE_WORKFLOW_ID'
+            - 'docker push "$DOCKER_USERNAME"/pyflasksemaphore:latest'
+            - 'docker push "$DOCKER_USERNAME"/pyflasksemaphore:$SEMAPHORE_WORKFLOW_ID'
+            - docker images
+      secrets:
+        - name: Docker Secrets
