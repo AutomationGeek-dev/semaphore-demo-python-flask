@@ -20,3 +20,17 @@ blocks:
             - docker images
       secrets:
         - name: Docker Secrets
+  - name: Testing the app
+    task:
+      secrets:
+        - name: Docker Secrets
+      prologue:
+        commands:
+          - 'echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin'
+          - checkout
+          - docker pull "$DOCKER_USERNAME"/pyflasksemaphore
+          - docker-compose up -d
+      jobs:
+        - name: Tests the app
+          commands:
+            - docker exec -it semaphore-pyflask-docker_flasksemaphore_1 python -m unittest
